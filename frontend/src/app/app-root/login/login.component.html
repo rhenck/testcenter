@@ -1,19 +1,18 @@
-<div class="version-label">
-  <a href="{{'https://github.com/iqb-berlin/testcenter/releases/tag/' + mainDataService.appConfig?.version}}" target="_blank">
-    IQB-Testcenter Version {{mainDataService.appConfig?.version}}
-  </a>
-</div>
-
-<div class="flex-row-wrap" [style.justify-content]="'center'" style="gap: 10px; margin-top: 60px;">
-  <form [formGroup]="loginForm" (ngSubmit)="login()" [style.display]="'flex'">
-    <mat-card appearance="raised">
-      <mat-card-header>
-        <mat-card-title>Anmelden</mat-card-title>
-      </mat-card-header>
-      <mat-card-content *ngIf="mainDataService.appConfig">
+<form [formGroup]="loginForm" (ngSubmit)="login()">
+  <mat-card class="login-card" appearance="raised">
+    <mat-card-header>
+      <mat-card-title>
+        <h1>{{mainDataService.appTitle$ | async}}</h1>
+      </mat-card-title>
+      <mat-card-subtitle>
+        <div [innerHTML]="mainDataService.appConfig?.trustedIntroHtml"></div>
+        <h2>Anmelden</h2>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content *ngIf="mainDataService.appConfig">
         <mat-form-field appearance="outline">
           <mat-label>Anmeldename</mat-label>
-          <input matInput formControlName="name" (keyup.enter)="pw.focus()" (keyup)="clearWarning()">
+          <input matInput formControlName="name" (keyup)="clearWarning()">
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Kennwort</mat-label>
@@ -24,69 +23,50 @@
             <mat-icon>{{showPassword ? 'visibility' : 'visibility_off'}}</mat-icon>
           </button>
         </mat-form-field>
-        <tc-alert [attr.data-cy]="'login-problem:' + problemCode" level="error" *ngIf="problemText" [text]="problemText"></tc-alert>
-      </mat-card-content>
-
-      <mat-card-actions [style.justify-content]="'space-between'">
-        <button mat-raised-button type="submit" color="primary" data-cy="login-user"
-                [disabled]="!loginForm.get('name')?.valid">
-          Weiter
-        </button>
-        <button mat-raised-button type="button" id="admin" data-cy="login-admin"
-                [disabled]="loginForm.invalid"
-                (click)="this.login('admin')">
-          Weiter als Admin
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  </form>
-
-  <mat-card appearance="outlined" class="status-card">
-    <mat-card-header>
-      <mat-card-title>{{mainDataService.appTitle$ | async}}</mat-card-title>
-      <mat-card-subtitle>{{mainDataService.appSubTitle$ | async}}</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
-      <div [innerHTML]="mainDataService.appConfig?.trustedIntroHtml"></div>
-      <tc-status-card></tc-status-card>
+        <div class="alert-box">
+          <tc-alert [attr.data-cy]="'login-problem:' + problemCode" level="error" *ngIf="problemText" [text]="problemText"></tc-alert>
+        </div>
     </mat-card-content>
-
-    <mat-card-actions [style.justify-content]="'space-between'">
-      <a *ngIf="this.mainDataService.sysCheckAvailable" mat-raised-button color="primary"
-         [routerLink]="['/r/check-starter']">
-        System-Check
-      </a>
-      <a [routerLink]="['/legal-notice']" mat-raised-button color="primary">Impressum/Datenschutz</a>
+    <mat-card-actions>
+      <button mat-raised-button type="submit" color="primary" data-cy="login-user"
+              [disabled]="!loginForm.get('name')?.valid">
+        Weiter
+      </button>
+      <button mat-stroked-button type="button" id="admin" data-cy="login-admin"
+              [disabled]="loginForm.invalid"
+              (click)="this.login('admin')">
+        Weiter als Admin
+      </button>
     </mat-card-actions>
   </mat-card>
-</div>
+</form>
 
-<div class="flex-row-wrap" style="margin-top: 0.7em; justify-content: center; gap: 10px" *ngIf="!mainDataService.appConfig">
-  <mat-card appearance="raised" class="status-card">
-    <mat-card-content>
-      <tc-alert level="error" text="Die Verbindung mit dem Server ist nicht möglich."></tc-alert>
-    </mat-card-content>
-  </mat-card>
-</div>
+<mat-card *ngIf="!mainDataService.appConfig" appearance="raised" class="status-card">
+  <mat-card-content>
+    <tc-alert level="error" text="Verbindung mit dem Server ist nicht möglich."></tc-alert>
+  </mat-card-content>
+</mat-card>
 
-<div class="flex-row-wrap" style="margin-top: 0.7em; justify-content: center; gap: 10px" *ngIf="mainDataService.globalWarning">
-  <mat-card appearance="raised" class="status-card">
-    <mat-card-content>
-      <tc-alert level="warning" [text]="mainDataService.globalWarning"></tc-alert>
-    </mat-card-content>
-  </mat-card>
-</div>
-<div class="flex-row-wrap" style="margin-top: 0.7em; justify-content: center; gap: 10px" *ngIf="unsupportedBrowser.length">
-  <mat-card appearance="raised" class="status-card">
-    <mat-card-content>
-      <tc-alert
-          level="warning"
-          customtext="login_unsupportedBrowser"
-          text="Sie verwenden einen Browser, der nicht offiziell unterstützt wird."
-          [replacements]="unsupportedBrowser"
-      ></tc-alert>
-    </mat-card-content>
-  </mat-card>
-</div>
+<mat-card *ngIf="mainDataService.globalWarning" appearance="raised" class="status-card">
+  <mat-card-content>
+    <tc-alert level="warning" [text]="mainDataService.globalWarning"></tc-alert>
+  </mat-card-content>
+</mat-card>
 
+<mat-card *ngIf="unsupportedBrowser.length" appearance="raised" class="status-card">
+  <mat-card-content>
+    <tc-alert
+        level="warning"
+        customtext="login_unsupportedBrowser"
+        text="Sie verwenden einen Browser, der nicht offiziell unterstützt wird."
+        [replacements]="unsupportedBrowser"
+    ></tc-alert>
+  </mat-card-content>
+</mat-card>
 
+<footer>
+  <a [routerLink]="['/legal-notice']" mat-raised-button color="primary">Impressum/Datenschutz</a>
+  <a class="version" href="{{'https://github.com/iqb-berlin/testcenter/releases/tag/' + mainDataService.appConfig?.version}}" target="_blank">
+    IQB-Testcenter Version {{mainDataService.appConfig?.version}}
+  </a>
+</footer>
